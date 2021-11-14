@@ -13,15 +13,11 @@ export interface Annotation {
   type: keyof typeof types;
 }
 
-export interface AnnotationProps {
-  annotation: Annotation;
-  getBubblePosition: () => { top: number; left: number } | undefined;
-}
-
-export interface CanvasProps {
-  draws: { x: number; y: number }[];
+export interface CanvasProps<T> {
+  draws: T[];
   width: number;
   height: number;
   style: object;
   addItemToDraw: (position: { x: number; y: number }) => void;
+  draw?: (draw: T, canvasContext: CanvasRenderingContext2D) => void;
 }

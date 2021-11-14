@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import "./App.css";
 
 import Canvas from "./Canvas";
 import { Annotation, types } from "types/annotation";
 
+const BUBBLE_PATH = new Path2D(
+  "M20,3H4A2,2,0,0,0,2,5V22l5.36-5H20a2,2,0,0,0,2-2V5A2,2,0,0,0,20,3Z"
+);
 const IMAGE_HEIGHT: number = 1132;
 const IMAGE_WIDTH: number = 1026;
+const BUBBLE_SIZE: number = 24;
+const OPTIMAL_BUBBLE_SIZE: number = 72;
 const DEFAULT_TYPE: keyof typeof types = "Unconfirmed";
 const DEFAULT_ANNOTATIONS: Annotation[] = [
   {
@@ -50,12 +55,48 @@ function App() {
   const [annotations, setAnnotations] =
     useState<Annotation[]>(DEFAULT_ANNOTATIONS);
 
-  function addItemToDraw(position: { x: number; y: number }) {
-    setAnnotations((prev) => [
-      ...prev,
-      { x: position.x, y: position.y, label: "321", type: DEFAULT_TYPE },
-    ]);
-  }
+  const addItemToDraw = useCallback((position: { x: number; y: number }) => {
+    setAnnotations((prev) => {
+      const lastItem = prev[prev.length - 1];
+      const labelNumber = Number(lastItem.label.slice(1)) + 1;
+
+      return [
+        ...prev,
+        {
+          x: position.x,
+          y: position.y,
+          label: "#" + labelNumber,
+          type: DEFAULT_TYPE,
+        },
+      ];
+    });
+  }, []);
+
+  const draw = useCallback(
+    (draw: Annotation, canvasContext: CanvasRenderingContext2D) => {
+      canvasContext.save();
+      canvasContext.fillStyle = types[draw.type] + "CC";
+      canvasContext.translate(draw.x, draw.y - OPTIMAL_BUBBLE_SIZE);
+      canvasContext.scale(
+        OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE,
+        OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE
+      );
+      canvasContext.fill(BUBBLE_PATH);
+
+      canvasContext.restore();
+
+      canvasContext.save();
+      canvasContext.font = "bold 16px Arial";
+      canvasContext.fillStyle = "#FFFFFFFF";
+      canvasContext.fillText(
+        draw.label,
+        draw.x + OPTIMAL_BUBBLE_SIZE / 2,
+        draw.y - OPTIMAL_BUBBLE_SIZE / 2
+      );
+      canvasContext.restore();
+    },
+    []
+  );
 
   return (
     <div className="App">
@@ -64,6 +105,7 @@ function App() {
         height={IMAGE_HEIGHT}
         addItemToDraw={addItemToDraw}
         draws={annotations}
+        draw={draw}
         style={{ backgroundImage: "url(/site-blueprint.png)" }}
       />
     </div>

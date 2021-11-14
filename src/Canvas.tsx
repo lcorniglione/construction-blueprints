@@ -2,35 +2,57 @@ import { useEffect, useRef, MouseEvent } from "react";
 
 import { CanvasProps } from "types/annotation";
 
-function Canvas({ draws, addItemToDraw, ...props }: CanvasProps) {
+function Canvas<T extends { x: number; y: number }>({
+  draws,
+  addItemToDraw,
+  draw,
+  width,
+  height,
+  ...props
+}: CanvasProps<T>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d");
+    const context = getCanvasContext();
     if (!context) return;
 
-    const rect: DOMRect | undefined =
-      canvasRef.current?.getBoundingClientRect();
-
+    const rect = getBoundings();
     if (!rect) return;
 
-    draws.forEach((draw) => {
-      context.fillStyle = "#000000";
-      context.fillRect(draw.x, draw.y, 30, 30);
+    context.clearRect(0, 0, width, height);
+    draws.forEach((itemToDraw) => {
+      if (draw) {
+        draw(itemToDraw, context);
+      }
     });
-  }, [draws]);
+  }, [draws, draw, width, height]);
+
+  function getCanvasContext() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    return canvas.getContext("2d");
+  }
+
+  function getBoundings() {
+    return canvasRef.current?.getBoundingClientRect();
+  }
 
   function handleClick(e: MouseEvent<HTMLElement>) {
-    const rect: DOMRect | undefined =
-      canvasRef.current?.getBoundingClientRect();
+    const rect = getBoundings();
     if (!rect) return;
     const position = { x: e.pageX - rect.left, y: e.pageY };
     addItemToDraw(position);
   }
 
-  return <canvas ref={canvasRef} {...props} onClick={handleClick} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      onClick={handleClick}
+      {...props}
+    />
+  );
 }
 
 export default Canvas;
