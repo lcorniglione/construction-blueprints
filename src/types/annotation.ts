@@ -1,5 +1,3 @@
-import { RefObject } from "react";
-
 export const types = {
   Damage: "#EE6352",
   Incomplete: "#FAC05E",
@@ -18,4 +16,12 @@ export interface Annotation {
 export interface AnnotationProps {
   annotation: Annotation;
   getBubblePosition: () => { top: number; left: number } | undefined;
+}
+
+export interface CanvasProps {
+  draws: { x: number; y: number }[];
+  width: number;
+  height: number;
+  style: object;
+  addItemToDraw: (position: { x: number; y: number }) => void;
 }

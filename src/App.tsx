@@ -1,7 +1,7 @@
-import React, { MouseEvent, useRef, useState, useCallback } from "react";
+import React, { useState } from "react";
 import "./App.css";
 
-import Bubble from "Bubble";
+import Canvas from "./Canvas";
 import { Annotation, types } from "types/annotation";
 
 const IMAGE_HEIGHT: number = 1132;
@@ -46,56 +46,26 @@ const DEFAULT_ANNOTATIONS: Annotation[] = [
   },
 ];
 
-function getCoordinates(
-  bounding: DOMRect,
-  event: MouseEvent<HTMLElement>
-): { x: number; y: number } {
-  const x = event.pageX - bounding.left;
-  const y = event.pageY - bounding.top;
-  return { x, y };
-}
-
 function App() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [annotations, setAnnotations] =
     useState<Annotation[]>(DEFAULT_ANNOTATIONS);
 
-  const getBubblePosition = useCallback(() => {
-    if (!canvasRef) return;
-    const rect: DOMRect | undefined =
-      canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    return { top: rect.top, left: rect.left };
-  }, []);
-
-  function handleCanvasClick(e: MouseEvent<HTMLElement>) {
-    if (!canvasRef) return;
-    const rect: DOMRect | undefined =
-      canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const { x, y } = getCoordinates(rect, e);
-    setAnnotations((ann) => [
-      ...ann,
-      { x, y, label: "dsaf", type: DEFAULT_TYPE },
+  function addItemToDraw(position: { x: number; y: number }) {
+    setAnnotations((prev) => [
+      ...prev,
+      { x: position.x, y: position.y, label: "321", type: DEFAULT_TYPE },
     ]);
   }
 
   return (
     <div className="App">
-      <canvas
-        ref={canvasRef}
-        onClick={handleCanvasClick}
+      <Canvas
         width={IMAGE_WIDTH}
         height={IMAGE_HEIGHT}
+        addItemToDraw={addItemToDraw}
+        draws={annotations}
         style={{ backgroundImage: "url(/site-blueprint.png)" }}
       />
-      {annotations.map((ann, i) => (
-        <Bubble
-          key={String(ann.x + ann.y)}
-          annotation={ann}
-          getBubblePosition={getBubblePosition}
-        />
-      ))}
     </div>
   );
 }
