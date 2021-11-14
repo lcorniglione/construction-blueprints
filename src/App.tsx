@@ -74,13 +74,12 @@ function App() {
 
   const draw = useCallback(
     (draw: Annotation, canvasContext: CanvasRenderingContext2D) => {
+      const scale = OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE;
+
       canvasContext.save();
       canvasContext.fillStyle = types[draw.type] + "CC";
       canvasContext.translate(draw.x, draw.y - OPTIMAL_BUBBLE_SIZE);
-      canvasContext.scale(
-        OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE,
-        OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE
-      );
+      canvasContext.scale(scale, scale);
       canvasContext.fill(BUBBLE_PATH);
 
       canvasContext.restore();
@@ -106,7 +105,9 @@ function App() {
         addItemToDraw={addItemToDraw}
         draws={annotations}
         draw={draw}
-        style={{ backgroundImage: "url(/site-blueprint.png)" }}
+        style={{
+          background: `url(/site-blueprint.png) no-repeat center center `,
+        }}
       />
     </div>
   );
