@@ -11,6 +11,7 @@ const IMAGE_HEIGHT: number = 1132;
 const IMAGE_WIDTH: number = 1026;
 const BUBBLE_SIZE: number = 24;
 const OPTIMAL_BUBBLE_SIZE: number = 72;
+const SCALE_NUMBER = OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE;
 const DEFAULT_TYPE: keyof typeof types = "Unconfirmed";
 const DEFAULT_ANNOTATIONS: Annotation[] = [
   {
@@ -38,16 +39,16 @@ const DEFAULT_ANNOTATIONS: Annotation[] = [
     type: "Incomplete",
   },
   {
-    x: 563,
-    y: 100,
-    label: "#50",
-    type: "Observation",
-  },
-  {
     x: 908,
     y: 114,
     label: "#55",
     type: "Resolved",
+  },
+  {
+    x: 563,
+    y: 100,
+    label: "#50",
+    type: "Observation",
   },
 ];
 
@@ -57,7 +58,13 @@ function App() {
 
   const addItemToDraw = useCallback((position: { x: number; y: number }) => {
     setAnnotations((prev) => {
-      const lastItem = prev[prev.length - 1];
+      const orderedArray = prev.sort((previous, curr) => {
+        const prevNum = Number(previous.label.slice(1));
+        const currNum = Number(curr.label.slice(1));
+
+        return prevNum - currNum;
+      });
+      const lastItem = orderedArray[prev.length - 1];
       const labelNumber = Number(lastItem.label.slice(1)) + 1;
 
       return [
@@ -74,12 +81,10 @@ function App() {
 
   const draw = useCallback(
     (draw: Annotation, canvasContext: CanvasRenderingContext2D) => {
-      const scale = OPTIMAL_BUBBLE_SIZE / BUBBLE_SIZE;
-
       canvasContext.save();
       canvasContext.fillStyle = types[draw.type] + "CC";
       canvasContext.translate(draw.x, draw.y - OPTIMAL_BUBBLE_SIZE);
-      canvasContext.scale(scale, scale);
+      canvasContext.scale(SCALE_NUMBER, SCALE_NUMBER);
       canvasContext.fill(BUBBLE_PATH);
 
       canvasContext.restore();
@@ -106,7 +111,7 @@ function App() {
         draws={annotations}
         draw={draw}
         style={{
-          background: `url(/site-blueprint.png) no-repeat center center `,
+          background: `url(/site-blueprint.png) no-repeat center center`,
         }}
       />
     </div>

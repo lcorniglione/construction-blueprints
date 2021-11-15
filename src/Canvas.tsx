@@ -40,7 +40,10 @@ function Canvas<T extends { x: number; y: number }>({
   function handleClick(e: MouseEvent<HTMLElement>) {
     const rect = getBoundings();
     if (!rect) return;
-    const position = { x: e.pageX - rect.left, y: e.pageY };
+    const position = {
+      x: e.pageX - rect.left,
+      y: e.pageY - rect.top - window.scrollY,
+    };
     addItemToDraw(position);
   }
 
